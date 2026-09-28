@@ -5,27 +5,39 @@
 //
 // Битовое поле
 
+#include <stdexcept>
 #include "tbitfield.h"
 
 // Fake variables used as placeholders in tests
 static const int FAKE_INT = -1;
 static TBitField FAKE_BITFIELD(1);
 
-TBitField::TBitField(int len)
-{
+TBitField::TBitField(int len) {
+    if (len < 0) {
+        throw runtime_error("Некорректное значение длины поля!");
+    }
+    const int bitsPerElem = sizeof(TELEM) << 3;
+    this->BitLen = len;
+    this->MemLen = (len + bitsPerElem - 1) / bitsPerElem;
+    this->pMem = new TELEM[this->MemLen];
+    memset(this->pMem, 0, this->MemLen * sizeof(TELEM));
 }
 
-TBitField::TBitField(const TBitField &bf) // конструктор копирования
-{
+TBitField::TBitField(const TBitField &bf) {
+    this->BitLen = bf.BitLen;
+    this->MemLen = bf.MemLen;
+    this->pMem = new TELEM[this->MemLen];
+    for (int i = 0; i < this->MemLen; i++) {
+        pMem[i] = bf.pMem[i];
+    }
 }
 
-TBitField::~TBitField()
-{
+TBitField::~TBitField() {
+    delete[] this->pMem;
 }
 
-int TBitField::GetMemIndex(const int n) const // индекс Мем для бита n
-{
-    return FAKE_INT;
+int TBitField::GetMemIndex(const int n) const {
+    return n >> (sizeof(TELEM) << 3);
 }
 
 TELEM TBitField::GetMemMask(const int n) const // битовая маска для бита n
