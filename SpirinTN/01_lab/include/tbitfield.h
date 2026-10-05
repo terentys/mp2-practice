@@ -6,6 +6,8 @@
 using namespace std;
 
 typedef unsigned int TELEM;
+#define BIT_IN_BYTE 8
+#define BIT_SHIFTING 3
 
 class TBitField {
 private:

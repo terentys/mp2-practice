@@ -8,7 +8,8 @@ TBitField::TBitField(int len) {
     if (len < 0) {
         throw runtime_error("Некорректное значение длины битового поля!");
     }
-    const int bitsPerElem = sizeof(TELEM) << 3;
+
+    const int bitsPerElem = sizeof(TELEM) << BIT_SHIFTING;
     this->BitLen = len;
     this->MemLen = (len + bitsPerElem - 1) / bitsPerElem;
     this->pMem = new TELEM[this->MemLen];
@@ -29,13 +30,11 @@ TBitField::~TBitField() {
 }
 
 int TBitField::GetMemIndex(const int n) const {
-    return n / (8 * sizeof(TELEM));
-    //return n >> 5;
+    return n / (BIT_IN_BYTE * sizeof(TELEM));
 }
 
 TELEM TBitField::GetMemMask(const int n) const {
-    return TELEM(1) << (n & ((sizeof(TELEM) << 3) - 1));
-    //return TELEM(1) << (n % (8 * sizeof(TELEM)));
+    return TELEM(1) << (n & ((sizeof(TELEM) << BIT_SHIFTING) - 1));
 }
 
 int TBitField::GetLength(void) const {
@@ -46,6 +45,7 @@ void TBitField::SetBit(const int n) {
     if (n < 0 || n >= this->BitLen) {
         throw std::out_of_range("Такого бита в поле нет!");
     }
+
     this->pMem[GetMemIndex(n)] |= GetMemMask(n);
 }
 
@@ -53,7 +53,18 @@ void TBitField::ClrBit(const int n) {
     if (n < 0 || n >= this->BitLen) {
         throw std::out_of_range("Такого бита в поле нет!");
     }
-    this->pMem[GetMemIndex(n)] &= ~GetMemMask(n);
+
+    int MemIndex = GetMemIndex(n);
+    this->pMem[MemIndex] &= ~GetMemMask(n);
+
+
+    if (MemIndex == this->MemLen - 1) {
+        int lenMaskForResetZero = this->BitLen & ((sizeof(TELEM) << BIT_SHIFTING) - 1);
+        if (lenMaskForResetZero != 0) {
+            TELEM maskForResetZero = (TELEM(1) << lenMaskForResetZero) - 1;
+            this->pMem[MemIndex] &= maskForResetZero;
+        }
+    }
 }
 
 int TBitField::GetBit(const int n) const {
@@ -61,7 +72,7 @@ int TBitField::GetBit(const int n) const {
       throw std::out_of_range("Такого бита в поле нет!");
   }
 
-  return (this->pMem[GetMemIndex(n)] & GetMemMask(n)) >> (n & ((sizeof(TELEM) << 3) - 1));
+  return (this->pMem[GetMemIndex(n)] & GetMemMask(n)) >> (n & ((sizeof(TELEM) << BIT_SHIFTING) - 1));
 }
 
 const TBitField& TBitField::operator=(const TBitField &bf) {
@@ -75,6 +86,8 @@ const TBitField& TBitField::operator=(const TBitField &bf) {
     this->pMem = temp;
     this->MemLen = bf.MemLen;
     this->BitLen = bf.BitLen;
+
+    //создавать только в случае разного размера
 
     return *this;
 }
@@ -129,7 +142,7 @@ TBitField TBitField::operator~(void) const {
         bfResult.pMem[i] = ~bfResult.pMem[i];
     }
 
-    int lenMaskForResetZero = bfResult.BitLen & ((sizeof(TELEM) << 3) - 1);
+    int lenMaskForResetZero = bfResult.BitLen & ((sizeof(TELEM) << BIT_SHIFTING) - 1);
     if (lenMaskForResetZero != 0) {
         TELEM maskForResetZero = (TELEM(1) << lenMaskForResetZero) - 1;
         bfResult.pMem[bfResult.MemLen - 1] &= maskForResetZero;

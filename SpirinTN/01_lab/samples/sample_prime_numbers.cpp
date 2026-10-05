@@ -1,6 +1,6 @@
 ﻿#include <iomanip>
 
-//#define USE_SET 
+#define USE_SET 
 
 #ifndef USE_SET
 

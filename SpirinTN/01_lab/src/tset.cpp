@@ -89,8 +89,10 @@ TSet TSet::operator~(void) const {
 
 istream& operator>>(istream& istr, TSet& s) {
     return istr >> s.BitField;
+    //изменить
 }
 
 ostream& operator<<(ostream &ostr, const TSet &s) {
     return ostr << s.BitField;
+    //изменить
 }
