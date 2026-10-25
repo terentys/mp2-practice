@@ -1,10 +1,4 @@
-﻿// ННГУ, ИИТММ, Курс "Алгоритмы и структуры данных"
-//
-// Copyright (c) Сысоев А.В.
-//
-//
-
-#ifndef __TDynamicMatrix_H__
+﻿#ifndef __TDynamicMatrix_H__
 #define __TDynamicMatrix_H__
 
 #include <iostream>
@@ -14,55 +8,67 @@ using namespace std;
 const int MAX_VECTOR_SIZE = 100000000;
 const int MAX_MATRIX_SIZE = 10000;
 
-// Динамический вектор - 
-// шаблонный вектор на динамической памяти
 template<typename T>
-class TDynamicVector
-{
+class TDynamicVector {
 protected:
-  size_t sz;
-  T* pMem;
+    size_t sz;
+    T* pMem;
 public:
-  TDynamicVector(size_t size = 1) : sz(size)
-  {
-    if (sz == 0)
-      throw out_of_range("Vector size should be greater than zero");
-    pMem = new T[sz]();// {}; // У типа T д.б. констуктор по умолчанию
-  }
-  TDynamicVector(T* arr, size_t s) : sz(s)
-  {
-    assert(arr != nullptr && "TDynamicVector ctor requires non-nullptr arg");
-    pMem = new T[sz];
-    std::copy(arr, arr + sz, pMem);
-  }
-  TDynamicVector(const TDynamicVector& v)
-  {
-      throw "Method is not implemented";
-  }
-  TDynamicVector(TDynamicVector&& v) noexcept
-  {
-  }
-  ~TDynamicVector()
-  {
-  }
-  TDynamicVector& operator=(const TDynamicVector& v)
-  {
-      throw "Method is not implemented";
-  }
-  TDynamicVector& operator=(TDynamicVector&& v) noexcept
-  {
-      return *this;
-  }
+    TDynamicVector(size_t size = 1) : sz(size) {
+        if (sz == 0) throw out_of_range("Vector size should be greater than zero");
+        pMem = new T[sz];
+    }
+    TDynamicVector(T* arr, size_t s) : sz(s) {
+        assert(arr != nullptr && "TDynamicVector ctor requires non-nullptr arg");
+        pMem = new T[sz];
+        std::copy(arr, arr + sz, pMem);
+    }
+    TDynamicVector(const TDynamicVector& v) : sz(v.sz), pMem(new T[sz]) {
+        std::copy(v.pMem, v.pMem + v.sz, pMem);
+    }
+    TDynamicVector(TDynamicVector&& v) noexcept : sz(v.sz), pMem(v.pMem) {
+        v.sz = 0;
+        v.pMem = nullptr;
+    }
+    ~TDynamicVector() {
+        delete[] pMem;
+    }
+    TDynamicVector& operator=(const TDynamicVector& v) {
+        if (this == &v) return *this;
+        
+        if (sz != v.sz) {
+            T* newPMem = new T[v.sz];
+            sz = v.sz;
+            delete[] pMem;
+            pMem = newPMem;
+        }
 
-  size_t size() const noexcept { return sz; }
+        std::copy(v.pMem, v.pMem + v.sz, pMem);
+
+        return *this;
+    }
+    TDynamicVector& operator=(TDynamicVector&& v) noexcept {
+        if (this == &v) return *this;
+
+        sz = v.sz;
+        delete[] pMem;
+        pMem = v.pMem;
+
+        v.sz = 0;
+        v.pMem = nullptr;
+
+        return *this;
+    }
+
+  size_t size() const noexcept { 
+      return sz; 
+  }
 
   // индексация
-  T& operator[](size_t ind)
-  {
+  T& operator[](size_t ind) {
       throw "Method is not implemented";
   }
-  const T& operator[](size_t ind) const
-  {
+  const T& operator[](size_t ind) const {
       throw "Method is not implemented";
   }
   // индексация с контролем
