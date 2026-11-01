@@ -162,7 +162,7 @@ public:
 
         return resultVector;
     }
-    //T operator*(const TDynamicVector& v) const noexcept(noexcept(T()))
+
     T operator*(const TDynamicVector& v) const {
         if (sz != v.sz) {
             throw invalid_argument("The vector sizes do not match");
@@ -195,7 +195,7 @@ public:
             ostr << v.pMem[i];
             if (i < v.sz - 1) ostr << ' ';
         }
-        ostr << "]";
+        ostr << " ]";
         return ostr;
     }
 };
@@ -258,7 +258,7 @@ public:
     }
 
     TDynamicVector<T> operator*(const TDynamicVector<T>& v) const {
-        if (sz != v.sz) {
+        if (sz != v.size()) {
             throw invalid_argument("The sizes do not match");
         }
 
@@ -330,16 +330,16 @@ public:
     }
     friend ostream& operator<<(ostream& ostr, const TDynamicMatrix& v) {
         for (size_t i = 0; i < v.sz; i++) {
-            ostr << '[ ';
+            ostr << "[ ";
             for (size_t j = 0; j < v.sz; j++) {
                 if (j < i) {
-                    ostr << setw(6) << 0;
+                    ostr << setw(7) << 0;
                 }
                 else {
-                    ostr << setw(6) << v.pMem[i][j - i];
+                    ostr << setw(7) << v.pMem[i][j - i];
                 }
             }
-            ostr << ' ]\n';
+            ostr << " ]\n";
         }
 
         return ostr;

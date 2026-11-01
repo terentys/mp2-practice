@@ -38,7 +38,7 @@ int main() {
   cout << "Scalar v1 * v2 = " << v1 * v2 << endl;
 
 
-  cout << "Тестирование класса работы с матрицами" << endl;
+  cout << "\nТестирование класса работы с матрицами" << endl;
 
   TDynamicMatrix<int> a(5), b(5);
   for (int i = 0; i < 5; i++) {
