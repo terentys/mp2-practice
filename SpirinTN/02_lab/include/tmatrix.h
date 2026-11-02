@@ -149,7 +149,7 @@ public:
 
         return resultVector;
     }
-    TDynamicVector operator-(const TDynamicVector& v) const  {
+    TDynamicVector operator-(const TDynamicVector& v) const {
         if (sz != v.sz) {
             throw invalid_argument("The vector sizes do not match");
         }

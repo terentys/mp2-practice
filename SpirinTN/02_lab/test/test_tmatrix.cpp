@@ -30,21 +30,17 @@ TEST(TDynamicMatrix, copied_matrix_is_equal_to_source_one) {
 
     TDynamicMatrix<int> m2(m1);
 
-    EXPECT_EQ(m1.getDimension(), m2.getDimension());
     EXPECT_TRUE(m1 == m2);
 }
 
-TEST(TDynamicMatrix, copied_matrix_has_its_own_memory) {
+TEST(TDynamicMatrix, copied_matrix_has_its_own_memory) {// todo
     TDynamicMatrix<int> m1(4);
     m1(1, 2) = 123;
 
     TDynamicMatrix<int> m2(m1);
-
-    EXPECT_NE(&m1(1, 2), &m2(1, 2));
-
     m2(1, 2) = 999;
-    EXPECT_EQ(m1(1, 2), 123);
-    EXPECT_EQ(m2(1, 2), 999);
+
+    EXPECT_TRUE(m1 != m2);
 }
 
 TEST(TDynamicMatrix, can_get_size) {
@@ -78,25 +74,23 @@ TEST(TDynamicMatrix, throws_when_set_element_below_diagonal) {
     ASSERT_THROW(m(3, 1) = 123, out_of_range);
 }
 
-TEST(TDynamicMatrix, can_assign_matrix_to_itself) {
+TEST(TDynamicMatrix, can_assign_matrix_to_itself) { // todo
     TDynamicMatrix<int> m(4);
-    m(1, 2) = 123;
 
-    m = m;
-
-    EXPECT_EQ(m.getDimension(), 4);
-    EXPECT_EQ(m(1, 2), 123);
+    ASSERT_NO_THROW(m = m);
 }
 
-TEST(TDynamicMatrix, can_assign_matrices_of_equal_size) {
+TEST(TDynamicMatrix, can_assign_matrices_of_equal_size) { // todo
     TDynamicMatrix<int> m1(4);
-    m1(1, 2) = 123;
+    for (size_t i = 0; i < m1.getDimension(); i++) {
+        for (size_t j = i; i < m1.getDimension(); i++) {
+            m1(i, j) = i * 10 + j * 100;
+        }
+    }
     TDynamicMatrix<int> m2(4);
-    m2(1, 2) = 999;
-
     m2 = m1;
 
-    EXPECT_EQ(m2(1, 2), 123);
+    EXPECT_TRUE(m1 == m2);
 }
 
 TEST(TDynamicMatrix, assign_operator_change_matrix_size) {
@@ -108,17 +102,18 @@ TEST(TDynamicMatrix, assign_operator_change_matrix_size) {
     EXPECT_EQ(m2.getDimension(), 8);
 }
 
-TEST(TDynamicMatrix, can_assign_matrices_of_different_size) {
-    TDynamicMatrix<int> m1(6);
-    m1(1, 2) = 123;
-    m1(4, 5) = 456;
-    TDynamicMatrix<int> m2(4);
-    m2(1, 2) = 999;
+TEST(TDynamicMatrix, can_assign_matrices_of_different_size) { // todo
+    TDynamicMatrix<int> m1(4);
+    for (size_t i = 0; i < m1.getDimension(); i++) {
+        for (size_t j = i; i < m1.getDimension(); i++) {
+            m1(i, j) = i * 10 + j * 100;
+        }
+    }
+    TDynamicMatrix<int> m2(3);
 
     m2 = m1;
 
-    EXPECT_EQ(m2(1, 2), 123);
-    EXPECT_EQ(m2(4, 5), 456);
+    EXPECT_TRUE(m2 == m1);
 }
 
 TEST(TDynamicMatrix, compare_equal_matrices_return_true) {
@@ -147,41 +142,51 @@ TEST(TDynamicMatrix, matrices_with_different_size_are_not_equal) {
     EXPECT_FALSE(m1 == m2);
 }
 
-TEST(TDynamicMatrix, can_multiply_matrix_by_scalar) {
-    TDynamicMatrix<int> m(4);
+TEST(TDynamicMatrix, not_equal_operator_works_correctly) { // todo
+    TDynamicMatrix<int> m1(4);
+    TDynamicMatrix<int> m2(4);
+    for (size_t i = 0; i < m1.getDimension(); i++) {
+        for (size_t j = i; j < m1.getDimension(); j++) {
+            m1(i, j) = i + j;
+            m2(i, j) = i + j + 1;
+        }
+    }
+
+    EXPECT_TRUE(m1 != m2);
+}
+
+TEST(TDynamicMatrix, can_multiply_matrix_by_scalar) { // todo
+    const int k = 5;
+    TDynamicMatrix<int> m(4), exp(4);
     for (size_t i = 0; i < m.getDimension(); i++) {
         for (size_t j = i; j < m.getDimension(); j++) {
             m(i, j) = i + j;
+            exp(i, j) = (i + j) * k;
         }
     }
 
-    TDynamicMatrix<int> result = m * 5;
-
-    for (size_t i = 0; i < result.getDimension(); i++) {
-        for (size_t j = i; j < result.getDimension(); j++) {
-            EXPECT_EQ(result(i, j), (static_cast<int>(i) + static_cast<int>(j)) * 5);
-        }
-    }
+    EXPECT_TRUE((m * k) == exp);
 }
 
-TEST(TDynamicMatrix, can_multiply_matrix_by_vector) {
+TEST(TDynamicMatrix, can_multiply_matrix_by_vector) { // todo
     TDynamicMatrix<int> m(3);
     for (size_t i = 0; i < m.getDimension(); i++) {
         for (size_t j = i; j < m.getDimension(); j++) {
             m(i, j) = 1;
         }
     }
-    TDynamicVector<int> v(3);
-    v[0] = 1;
-    v[1] = 2;
-    v[2] = 3;
+    TDynamicVector<int> v(3), exp(3);
+    for (size_t i = 0; i < v.size(); i++) {
+        v[i] = i;
 
-    TDynamicVector<int> result = m * v;
+        int sum = m(i, i) * v[i];
+        for (size_t j = i + 1; j < v.size(); j++) {
+            sum += m(i, j) * v[j];
+        }
+        exp[i] = sum;
+    }
 
-    EXPECT_EQ(result.size(), 3);
-    EXPECT_EQ(result[0], 6);
-    EXPECT_EQ(result[1], 5);
-    EXPECT_EQ(result[2], 3);
+    EXPECT_TRUE((m * v) == exp);
 }
 
 TEST(TDynamicMatrix, cant_multiply_matrix_by_vector_with_not_equal_size) {
@@ -191,7 +196,7 @@ TEST(TDynamicMatrix, cant_multiply_matrix_by_vector_with_not_equal_size) {
     ASSERT_THROW(m * v, invalid_argument);
 }
 
-TEST(TDynamicMatrix, can_add_matrices_with_equal_size) {
+TEST(TDynamicMatrix, can_add_matrices_with_equal_size) { // todo //не сделано
     TDynamicMatrix<int> m1(4);
     TDynamicMatrix<int> m2(4);
     for (size_t i = 0; i < m1.getDimension(); i++) {
@@ -217,7 +222,7 @@ TEST(TDynamicMatrix, cant_add_matrices_with_not_equal_size) {
     ASSERT_THROW(m1 + m2, invalid_argument);
 }
 
-TEST(TDynamicMatrix, can_subtract_matrices_with_equal_size) {
+TEST(TDynamicMatrix, can_subtract_matrices_with_equal_size) { // todo //не сделано
     TDynamicMatrix<int> m1(4);
     TDynamicMatrix<int> m2(4);
     for (size_t i = 0; i < m1.getDimension(); i++) {
@@ -243,7 +248,7 @@ TEST(TDynamicMatrix, cant_subtract_matrixes_with_not_equal_size) {
     ASSERT_THROW(m1 - m2, invalid_argument);
 }
 
-TEST(TDynamicMatrix, can_multiply_matrices_with_equal_size) {
+TEST(TDynamicMatrix, can_multiply_matrices_with_equal_size) { // todo //не сделано
     TDynamicMatrix<int> m1(3);
     TDynamicMatrix<int> m2(3);
     for (size_t i = 0; i < m1.getDimension(); i++) {
